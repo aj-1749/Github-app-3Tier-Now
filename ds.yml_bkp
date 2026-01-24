@@ -1,6 +1,4 @@
-# =========================
 # MySQL Deployment
-# =========================
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -27,30 +25,6 @@ spec:
         ports:
         - containerPort: 3306
           name: mysql
-
-        # 🔍 PROBES FOR MYSQL
-        readinessProbe:
-          exec:
-            command:
-              - sh
-              - -c
-              - mysqladmin ping -h 127.0.0.1 -u root -p$MYSQL_ROOT_PASSWORD
-          initialDelaySeconds: 20
-          periodSeconds: 10
-          timeoutSeconds: 5
-          failureThreshold: 3
-
-        livenessProbe:
-          exec:
-            command:
-              - sh
-              - -c
-              - mysqladmin ping -h 127.0.0.1 -u root -p$MYSQL_ROOT_PASSWORD
-          initialDelaySeconds: 60
-          periodSeconds: 20
-          timeoutSeconds: 5
-          failureThreshold: 3
-
         resources:
           requests:
             memory: "512Mi"
@@ -59,9 +33,7 @@ spec:
             memory: "1Gi"
             cpu: "500m"
 ---
-# =========================
 # MySQL Service
-# =========================
 apiVersion: v1
 kind: Service
 metadata:
@@ -72,9 +44,7 @@ spec:
   selector:
     app: mysql
 ---
-# =========================
-# Bank Application Deployment
-# =========================
+# Java Application Deployment
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -94,7 +64,6 @@ spec:
         image: adijaiswal/bankapp:latest
         ports:
         - containerPort: 8080
-
         env:
         - name: SPRING_DATASOURCE_URL
           value: jdbc:mysql://mysql-service:3306/bankappdb?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
@@ -102,35 +71,6 @@ spec:
           value: root
         - name: SPRING_DATASOURCE_PASSWORD
           value: Test@123
-
-        # 🚀 STARTUP PROBE (VERY IMPORTANT FOR SPRING BOOT)
-        startupProbe:
-          httpGet:
-            path: /actuator/health
-            port: 8080
-          failureThreshold: 30
-          periodSeconds: 10
-
-        # 🟡 READINESS PROBE (TRAFFIC CONTROL)
-        readinessProbe:
-          httpGet:
-            path: /actuator/health/readiness
-            port: 8080
-          initialDelaySeconds: 20
-          periodSeconds: 5
-          timeoutSeconds: 3
-          failureThreshold: 3
-
-        # 🔴 LIVENESS PROBE (AUTO RESTART)
-        livenessProbe:
-          httpGet:
-            path: /actuator/health/liveness
-            port: 8080
-          initialDelaySeconds: 60
-          periodSeconds: 15
-          timeoutSeconds: 5
-          failureThreshold: 3
-
         resources:
           requests:
             memory: "512Mi"
@@ -139,9 +79,7 @@ spec:
             memory: "1Gi"
             cpu: "500m"
 ---
-# =========================
-# Bank Application Service
-# =========================
+# Bank Application Service (NodePort)
 apiVersion: v1
 kind: Service
 metadata:
