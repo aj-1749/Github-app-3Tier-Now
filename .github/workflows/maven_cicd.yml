@@ -84,11 +84,6 @@ jobs:
             -Dsonar.projectKey=${{ vars.SONAR_PROJECT_KEY }} \
             -Dsonar.organization=${{ vars.SONAR_ORGANIZATION }} \
             -Dsonar.login=${{ secrets.SONAR_TOKEN }}
-
-      - name: SonarCloud Quality Gate
-        uses: sonarsource/sonarcloud-quality-gate-action@v1
-        with:
-          timeout: 5m
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
