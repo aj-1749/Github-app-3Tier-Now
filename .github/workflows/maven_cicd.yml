@@ -6,7 +6,7 @@ on:
       - main
 
 env:
-  IMAGE_NAME: adijaiswal/bankapp
+  IMAGE_NAME: hello8989/bankapp
   K8S_CONTEXT: kind-dev-cluster
 
 jobs:
@@ -131,7 +131,7 @@ jobs:
 
       - name: Update Image Tag
         run: |
-          sed -i "s|adijaiswal/bankapp:latest|adijaiswal/bankapp:${{ github.sha }}|g" ds.yml
+          sed -i "s|hello8989/bankapp:latest|adijaiswal/bankapp:${{ github.sha }}|g" ds.yml
 
       - name: Deploy to KIND
         run: kubectl apply -f ds.yml
