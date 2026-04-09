@@ -1,15 +1,13 @@
-name: Destroy DevSecOps Project (KIND Cleanup)
+name: End-to-End DevSecOps CI/CD (Local KIND)
 
 on:
-  workflow_dispatch:   # manual trigger (BEST PRACTICE)
   push:
     branches:
-      - destroy        # optional branch trigger
+      - main
 
 env:
   IMAGE_NAME: hello8989/bankapp
   K8S_CONTEXT: kind-dev-cluster
-  NAMESPACE: default
 
 jobs:
 
