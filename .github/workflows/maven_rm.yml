@@ -32,7 +32,7 @@ jobs:
       - name: Delete Application
         run: |
           echo "Deleting K8s resources..."
-          kubectl delete -f k8s/deployment.yml --ignore-not-found=true
+          kubectl delete -f k8s/ds.yml --ignore-not-found=true
 
 # -----------------------------
 # 3. Force Cleanup (Fallback)
