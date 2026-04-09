@@ -1,0 +1,79 @@
+name: Destroy DevSecOps Project (KIND Cleanup)
+
+on:
+  workflow_dispatch:   # manual trigger (BEST PRACTICE)
+  push:
+    branches:
+      - destroy        # optional branch trigger
+
+env:
+  IMAGE_NAME: hello8989/bankapp
+  K8S_CONTEXT: kind-dev-cluster
+  NAMESPACE: default
+
+jobs:
+
+# ==========================================
+# 🔥 DESTROY / CLEANUP JOB
+# ==========================================
+  destroy:
+    runs-on: self-hosted
+
+    steps:
+      - uses: actions/checkout@v4
+
+# -----------------------------
+# 1. Set Kubernetes Context
+# -----------------------------
+      - name: Set K8s Context
+        run: kubectl config use-context $K8S_CONTEXT
+
+# -----------------------------
+# 2. Delete K8s Resources
+# -----------------------------
+      - name: Delete Application
+        run: |
+          echo "Deleting K8s resources..."
+          kubectl delete -f k8s/deployment.yml --ignore-not-found=true
+
+# -----------------------------
+# 3. Force Cleanup (Fallback)
+# -----------------------------
+      - name: Force Delete (if stuck)
+        run: |
+          kubectl delete deployment bankapp --ignore-not-found=true
+          kubectl delete deployment mysql --ignore-not-found=true
+          kubectl delete svc bankapp-service --ignore-not-found=true
+          kubectl delete svc mysql-service --ignore-not-found=true
+
+# -----------------------------
+# 4. Delete Namespace (Optional)
+# -----------------------------
+      - name: Delete Namespace (Optional)
+        run: |
+          kubectl delete namespace $NAMESPACE --ignore-not-found=true
+
+# -----------------------------
+# 5. Remove Docker Images (Local)
+# -----------------------------
+      - name: Remove Docker Images
+        run: |
+          docker rmi $IMAGE_NAME:latest || true
+          docker rmi $IMAGE_NAME:${{ github.sha }} || true
+
+# -----------------------------
+# 6. Clean Workspace
+# -----------------------------
+      - name: Cleanup Workspace
+        run: |
+          docker system prune -af || true
+
+# -----------------------------
+# 7. Verify Cleanup
+# -----------------------------
+      - name: Verify Cleanup
+        run: |
+          echo "Remaining Pods:"
+          kubectl get pods || true
+          echo "Remaining Services:"
+          kubectl get svc || true
